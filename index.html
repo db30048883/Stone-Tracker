@@ -18,7 +18,7 @@
         <h2>Add Stone</h2>
         <form id="stone-form">
           <label>Stone ID <input id="stone-id" required placeholder="ST-1001" /></label>
-          <label>Weight (tons, imperial) <input id="weight" required type="number" step="0.01" min="0" /></label>
+          <label>Weight (tons only, imperial) <input id="weight" required type="number" step="0.01" min="0" placeholder="1.25" /></label>
           <label>Date <input id="date" required type="date" /></label>
           <button type="submit">Save Stone</button>
         </form>
@@ -27,7 +27,7 @@
       <section class="card">
         <h2>Cloud Sync (optional)</h2>
         <p id="cloud-status" class="muted">Cloud sync disabled (using offline local mode).</p>
-        <div class="scan-controls">
+        <div class="scan-controls compact">
           <button id="sync-now" type="button">Sync from Cloud</button>
         </div>
       </section>
