@@ -9,7 +9,8 @@ Offline-friendly tracker for logging stones with:
 
 ## Features
 
-- Create and store stone records in browser storage (`localStorage`).
+- Create and store stone records in browser storage.
+- Optional Supabase sync so records work across multiple devices.
 - Assign unique code per stone for QR/NFC workflows.
 - QR labels encode a tracker lookup URL (`?tag=...`) so scanning can open directly to the matching stone.
 - Lookup stones by scanned code.
@@ -17,7 +18,7 @@ Offline-friendly tracker for logging stones with:
 - NFC read/write support (on compatible devices/browsers).
 - Service worker caching for offline usage.
 
-## Run locally
+## Run
 
 Serve with any static server:
 
@@ -27,31 +28,44 @@ python3 -m http.server 8080
 
 Open `http://localhost:8080`.
 
-## Deploy to Netlify (simple option)
+## Multi-device setup with Supabase
 
-This app is fully static, so Netlify is the easiest way to put it online.
+1. Create a Supabase project.
+2. In Supabase SQL editor, run:
 
-### Option A: Drag-and-drop deploy (fastest)
+```sql
+create table if not exists public.stones (
+  tag_code text primary key,
+  stone_id text not null,
+  weight_tons_imperial numeric not null,
+  date date not null,
+  created_at timestamptz not null default now()
+);
+```
 
-1. Go to Netlify.
-2. Create/login to your account.
-3. Drag this project folder (or zipped files) into Netlify's deploy area.
-4. Netlify gives you a live URL immediately.
+3. Enable read/write for your app users (quick start policy for testing only):
 
-### Option B: Connect Git repo (recommended)
+```sql
+alter table public.stones enable row level security;
 
-1. Push this repo to GitHub/GitLab.
-2. In Netlify, choose **Add new site** → **Import from Git**.
-3. Select your repo.
-4. Build command: **(leave empty)**
-5. Publish directory: **/** (root)
-6. Deploy.
+create policy "allow anon read" on public.stones
+for select to anon
+using (true);
 
-## Field usage tips
+create policy "allow anon write" on public.stones
+for insert to anon
+with check (true);
+```
 
-- Open the Netlify URL on each field device.
-- Create stones, then use each row's **QR** button to generate labels.
-- Scan QR in the field to open the app and show matching stone details.
-- For offline use, open the app once while online so browser cache is populated.
+4. Edit `config.js` and set:
 
-> Note: without a backend, records are stored per device/browser.
+- `SUPABASE_URL` = your project URL
+- `SUPABASE_ANON_KEY` = your anon public key
+- `PUBLIC_APP_URL` = public URL where this app is hosted (so QR works on other devices)
+
+5. Host the app at that `PUBLIC_APP_URL` (Netlify/Vercel/GitHub Pages/etc).
+6. On each device, open the app and click **Sync from Cloud** once.
+
+After this, a stone created on device A can be looked up from a QR scan on device B.
+
+> Note: the current policy example allows anonymous write for quick testing. Lock this down before production.
