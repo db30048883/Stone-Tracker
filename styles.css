@@ -85,3 +85,57 @@ td {
 .muted {
   color: #5f6368;
 }
+
+.field-result {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 2px solid #0d6efd;
+  border-radius: 8px;
+  background: #f0f6ff;
+}
+
+.field-result h3 {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.field-result p {
+  font-size: 1.15rem;
+  margin: 0.35rem 0;
+}
+
+.field-label {
+  display: inline-block;
+  background: #0d6efd;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-weight: 700;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hidden {
+  display: none;
+}
+
+#qr-image {
+  width: 240px;
+  height: 240px;
+  object-fit: contain;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+  background: white;
+}
+
+#qr-dialog code {
+  word-break: break-all;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
