@@ -19,6 +19,8 @@
         <form id="stone-form">
           <label>Stone ID <input id="stone-id" required placeholder="ST-1001" /></label>
           <label>Weight (tons only, imperial) <input id="weight" required type="number" step="0.01" min="0" placeholder="1.25" /></label>
+          <label>Weight (tons, imperial) <input id="weight" required type="number" step="0.01" min="0" /></label>
+          <label>Weight (kg) <input id="weight" required type="number" step="0.01" min="0" /></label>
           <label>Date <input id="date" required type="date" /></label>
           <button type="submit">Save Stone</button>
         </form>
@@ -28,6 +30,7 @@
         <h2>Cloud Sync (optional)</h2>
         <p id="cloud-status" class="muted">Cloud sync disabled (using offline local mode).</p>
         <div class="scan-controls compact">
+        <div class="scan-controls">
           <button id="sync-now" type="button">Sync from Cloud</button>
         </div>
       </section>
@@ -36,6 +39,9 @@
         <h2>Scan / Lookup</h2>
         <div class="scan-controls">
           <input id="scan-input" placeholder="Paste scanned QR/NFC code or URL" />
+        <h2>Scan / Lookup</h2>
+        <div class="scan-controls">
+          <input id="scan-input" placeholder="Paste scanned QR/NFC code" />
           <button id="find-stone" type="button">Find</button>
           <button id="start-nfc-read" type="button">Read NFC</button>
         </div>
@@ -83,6 +89,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
+      <p>Use this URL to print/preview the QR label. The QR image can be generated online once and printed for offline field use.</p>
+      <a id="qr-link" target="_blank" rel="noopener"></a>
+      <button id="close-dialog">Close</button>
+    </dialog>
+
     <script src="app.js"></script>
   </body>
 </html>
