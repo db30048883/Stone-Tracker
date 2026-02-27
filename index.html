@@ -25,9 +25,17 @@
       </section>
 
       <section class="card">
+        <h2>Cloud Sync (optional)</h2>
+        <p id="cloud-status" class="muted">Cloud sync disabled (using offline local mode).</p>
+        <div class="scan-controls">
+          <button id="sync-now" type="button">Sync from Cloud</button>
+        </div>
+      </section>
+
+      <section class="card">
         <h2>Scan / Lookup</h2>
         <div class="scan-controls">
-          <input id="scan-input" placeholder="Paste scanned QR/NFC code" />
+          <input id="scan-input" placeholder="Paste scanned QR/NFC code or URL" />
           <button id="find-stone" type="button">Find</button>
           <button id="start-nfc-read" type="button">Read NFC</button>
         </div>
@@ -73,6 +81,8 @@
       <button id="close-dialog">Close</button>
     </dialog>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

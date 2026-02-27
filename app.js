@@ -6,6 +6,8 @@ const scanInput = document.getElementById("scan-input");
 const scanResult = document.getElementById("scan-result");
 const findStoneButton = document.getElementById("find-stone");
 const startNfcReadButton = document.getElementById("start-nfc-read");
+const syncNowButton = document.getElementById("sync-now");
+const cloudStatus = document.getElementById("cloud-status");
 const qrDialog = document.getElementById("qr-dialog");
 const qrLink = document.getElementById("qr-link");
 const qrImage = document.getElementById("qr-image");
@@ -17,11 +19,15 @@ const fieldStoneWeight = document.getElementById("field-stone-weight");
 const fieldStoneDate = document.getElementById("field-stone-date");
 const fieldStoneTag = document.getElementById("field-stone-tag");
 
+const config = window.STONE_TRACKER_CONFIG || {};
+const supabaseClient = initSupabaseClient();
+
 const records = loadRecords();
 render();
 lookupFromPageUrl();
+updateCloudStatus();
 
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const stoneId = document.getElementById("stone-id").value.trim();
@@ -33,22 +39,35 @@ form.addEventListener("submit", (event) => {
   const uid = crypto.randomUUID();
   const tagCode = `STONE-${uid}`;
 
-  records.unshift({
+  const newRecord = {
     uid,
     stoneId,
     weight,
     date,
     tagCode,
     createdAt: new Date().toISOString(),
-  });
+  };
 
-  persist();
+  upsertLocalRecord(newRecord);
   render();
   form.reset();
+
+  if (supabaseClient) {
+    const { error } = await supabaseClient.from("stones").upsert([toCloudRecord(newRecord)], { onConflict: "tag_code" });
+    if (error) {
+      cloudStatus.textContent = `Saved locally. Cloud save failed: ${error.message}`;
+      return;
+    }
+    cloudStatus.textContent = "Saved locally + synced to cloud.";
+  }
 });
 
 findStoneButton.addEventListener("click", () => {
   lookupStone(scanInput.value.trim());
+});
+
+syncNowButton.addEventListener("click", async () => {
+  await syncFromCloud();
 });
 
 startNfcReadButton.addEventListener("click", async () => {
@@ -75,6 +94,21 @@ startNfcReadButton.addEventListener("click", async () => {
 
 closeDialog.addEventListener("click", () => qrDialog.close());
 
+function initSupabaseClient() {
+  const hasConfig = config.SUPABASE_URL && config.SUPABASE_ANON_KEY;
+  if (!hasConfig || !window.supabase) return null;
+  return window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+}
+
+function updateCloudStatus() {
+  if (!supabaseClient) {
+    cloudStatus.textContent = "Cloud sync disabled (using offline local mode).";
+    syncNowButton.disabled = true;
+    return;
+  }
+  cloudStatus.textContent = "Cloud sync enabled.";
+}
+
 function loadRecords() {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
@@ -87,7 +121,56 @@ function persist() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
 }
 
-function lookupStone(code) {
+function upsertLocalRecord(record) {
+  const existingIndex = records.findIndex((item) => item.tagCode === record.tagCode);
+  if (existingIndex >= 0) {
+    records[existingIndex] = { ...records[existingIndex], ...record };
+  } else {
+    records.unshift(record);
+  }
+  persist();
+}
+
+function toCloudRecord(record) {
+  return {
+    tag_code: record.tagCode,
+    stone_id: record.stoneId,
+    weight_tons_imperial: record.weight,
+    date: record.date,
+    created_at: record.createdAt,
+  };
+}
+
+function fromCloudRecord(record) {
+  return {
+    uid: record.tag_code.replace("STONE-", "") || crypto.randomUUID(),
+    stoneId: record.stone_id,
+    weight: Number.parseFloat(record.weight_tons_imperial),
+    date: record.date,
+    tagCode: record.tag_code,
+    createdAt: record.created_at || new Date().toISOString(),
+  };
+}
+
+async function syncFromCloud() {
+  if (!supabaseClient) return;
+
+  cloudStatus.textContent = "Syncing from cloud...";
+  const { data, error } = await supabaseClient.from("stones").select("tag_code,stone_id,weight_tons_imperial,date,created_at").order("created_at", { ascending: false });
+  if (error) {
+    cloudStatus.textContent = `Sync failed: ${error.message}`;
+    return;
+  }
+
+  for (const cloudRecord of data) {
+    upsertLocalRecord(fromCloudRecord(cloudRecord));
+  }
+
+  render();
+  cloudStatus.textContent = `Sync complete (${data.length} records loaded).`;
+}
+
+async function lookupStone(code) {
   const normalized = normalizeTagFromInput(code);
 
   if (!normalized) {
@@ -96,7 +179,21 @@ function lookupStone(code) {
     return;
   }
 
-  const found = records.find((record) => record.tagCode === normalized);
+  let found = records.find((record) => record.tagCode === normalized);
+
+  if (!found && supabaseClient) {
+    const { data, error } = await supabaseClient
+      .from("stones")
+      .select("tag_code,stone_id,weight_tons_imperial,date,created_at")
+      .eq("tag_code", normalized)
+      .maybeSingle();
+
+    if (!error && data) {
+      found = fromCloudRecord(data);
+      upsertLocalRecord(found);
+      render();
+    }
+  }
 
   if (!found) {
     scanResult.textContent = "No stone found for that code.";
@@ -110,7 +207,7 @@ function lookupStone(code) {
 
 function showFieldCard(record) {
   fieldStoneId.textContent = record.stoneId;
-  fieldStoneWeight.textContent = `${record.weight.toFixed(2)} tons (imperial)`;
+  fieldStoneWeight.textContent = `${Number(record.weight).toFixed(2)} tons (imperial)`;
   fieldStoneDate.textContent = record.date;
   fieldStoneTag.textContent = record.tagCode;
   fieldResultCard.classList.remove("hidden");
@@ -125,7 +222,8 @@ function clearFieldCard() {
 }
 
 function buildLookupUrl(tagCode) {
-  const url = new URL(window.location.href);
+  const base = config.PUBLIC_APP_URL || window.location.origin + window.location.pathname;
+  const url = new URL(base);
   url.searchParams.set("tag", tagCode);
   return url.toString();
 }
@@ -184,7 +282,7 @@ function render() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${record.stoneId}</td>
-      <td>${record.weight.toFixed(2)} tons (imperial)</td>
+      <td>${Number(record.weight).toFixed(2)} tons (imperial)</td>
       <td>${record.date}</td>
       <td><code>${record.tagCode}</code></td>
       <td class="actions">
