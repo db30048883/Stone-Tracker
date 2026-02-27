@@ -40,6 +40,7 @@ form.addEventListener("submit", async (event) => {
   const tagCode = `STONE-${uid}`;
 
   const newRecord = {
+  records.unshift({
     uid,
     stoneId,
     weight,
@@ -60,6 +61,11 @@ form.addEventListener("submit", async (event) => {
     }
     cloudStatus.textContent = "Saved locally + synced to cloud.";
   }
+  });
+
+  persist();
+  render();
+  form.reset();
 });
 
 findStoneButton.addEventListener("click", () => {
@@ -74,6 +80,9 @@ startNfcReadButton.addEventListener("click", async () => {
   if (!("NDEFReader" in window)) {
     scanResult.textContent = "NFC reading is not supported on this device/browser.";
     clearFieldCard();
+startNfcReadButton.addEventListener("click", async () => {
+  if (!("NDEFReader" in window)) {
+    scanResult.textContent = "NFC reading is not supported on this device/browser.";
     return;
   }
 
@@ -261,6 +270,17 @@ function openQrLabel(code) {
   qrLink.href = lookupUrl;
   qrLink.textContent = lookupUrl;
   qrRawCode.textContent = code;
+function lookupStone(code) {
+  const found = records.find((record) => record.tagCode === code);
+  scanResult.textContent = found
+    ? `Match: ${found.stoneId} | ${found.weight}kg | ${found.date}`
+    : "No stone found for that code.";
+}
+
+function openQrLabel(code) {
+  const qrApiUrl = `https://quickchart.io/qr?text=${encodeURIComponent(code)}&size=300`;
+  qrLink.href = qrApiUrl;
+  qrLink.textContent = qrApiUrl;
   qrDialog.showModal();
 }
 
@@ -283,6 +303,7 @@ function render() {
     tr.innerHTML = `
       <td>${record.stoneId}</td>
       <td>${Number(record.weight).toFixed(2)} tons (imperial)</td>
+      <td>${record.weight.toFixed(2)} kg</td>
       <td>${record.date}</td>
       <td><code>${record.tagCode}</code></td>
       <td class="actions">
