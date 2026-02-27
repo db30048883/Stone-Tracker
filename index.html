@@ -1,0 +1,733 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Core Rock Gradation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Offline Rock Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #161616;
+      --panel: #242424;
+      --panel-soft: #2d2d2d;
+      --accent: #f39c12;
+      --danger: #ef5350;
+      --text: #f1f1f1;
+      --muted: #b9b9b9;
+      --border: #3a3a3a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #1e1e1e;
+      color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: linear-gradient(180deg, #111, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    h1 {
+      color: orange;
+
+    .app {
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+    }
+    .container {
+      background: #2c2c2c;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 165, 0, 0.5);
+      max-width: 500px;
+      width: 100%;
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    #display {
+      background-color: #333;
+      padding: 10px;
+
+    h1, h2 { margin: 0; }
+
+    h1 {
+      color: var(--accent);
+      font-size: 1.8rem;
+    }
+
+    h2 {
+      font-size: 1.05rem;
+      color: #f7cf92;
+      margin-bottom: 10px;
+      text-align: right;
+      font-size: 1.5rem;
+      border-radius: 5px;
+      color: white;
+    }
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .keypad button, .action-btn {
+      padding: 15px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 8px;
+      background-color: limegreen;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+
+    .status {
+      font-size: 0.9rem;
+      color: var(--muted);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--panel-soft);
+    }
+    .action-btn {
+      background-color: orange;
+      margin-top: 10px;
+
+    .status.online { color: #6ddf77; }
+    .status.offline { color: #ffd166; }
+
+    form {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    .dropdown {
+      position: relative;
+      width: 100%;
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #444;
+
+    input {
+      width: 100%;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      padding: 10px;
+      border-radius: 8px;
+      z-index: 1;
+      border: 1px solid var(--border);
+      background: var(--panel-soft);
+      color: var(--text);
+      font-size: 1rem;
+    }
+    .dropdown.open .dropdown-content {
+      display: block;
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .dropdown-content button {
+      background-color: orange;
+      color: black;
+      padding: 12px 16px;
+
+    button {
+      border: none;
+      width: 100%;
+      text-align: left;
+      border-bottom: 1px solid #222;
+    }
+    .dropdown-content button:last-child {
+      border-bottom: none;
+    }
+    .result {
+      margin-top: 15px;
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #111;
+      background: var(--accent);
+    }
+    .weights-list {
+      margin-top: 10px;
+
+    button.secondary { background: #c7c7c7; }
+    button.danger { background: var(--danger); color: white; }
+
+    .summary {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: 0.95rem;
+      background: #1b1b1b;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .entries { display: grid; gap: 10px; }
+
+    .entry {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      background: var(--panel-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .entry.focused {
+      border-color: #ffd166;
+      box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.25);
+    }
+
+    .entry img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #131313;
+    }
+    .weight-entry {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+
+    .entry .meta {
+      display: grid;
+      gap: 4px;
+      font-size: 0.94rem;
+    }
+    .weight-entry button {
+      margin-left: 10px;
+      font-size: 0.8rem;
+
+    .tag-line {
+      font-family: monospace;
+      background: #202020;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: inline-block;
+      padding: 2px 6px;
+      background-color: crimson;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: #d9d9d9;
+    }
+    .weight-entry input {
+      width: 60px;
+
+    .lookup-note {
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: right;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 4px;
+      margin-top: 8px;
+    }
+    canvas {
+      margin-top: 15px;
+      max-width: 100%;
+
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 20px;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+    }
+
+    @media (max-width: 680px) {
+      .entry { grid-template-columns: 1fr; }
+      .entry img { width: 100%; height: 180px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Core Rock Gradation</h1>
+  <div class="container">
+    <div id="display">0</div>
+    <div class="keypad">
+      <button onclick="append('1')">1</button>
+      <button onclick="append('2')">2</button>
+      <button onclick="append('3')">3</button>
+      <button onclick="append('4')">4</button>
+      <button onclick="append('5')">5</button>
+      <button onclick="append('6')">6</button>
+      <button onclick="append('7')">7</button>
+      <button onclick="append('8')">8</button>
+      <button onclick="append('9')">9</button>
+      <button onclick="append('.')">.</button>
+      <button onclick="append('0')">0</button>
+      <button onclick="backspace()">⌫</button>
+    </div>
+    <button class="action-btn" onclick="addWeight()">Enter Weight</button>
+    <button class="action-btn" onclick="saveLog()">Finish + Save Log</button>
+
+    <div class="dropdown" id="dropdown">
+      <button class="action-btn" id="dropdownBtn">More ▼</button>
+      <div class="dropdown-content">
+        <button onclick="resetApp()">Reset</button>
+        <button onclick="exportCSV()">Export CSV</button>
+  <main class="app">
+    <section class="card topbar">
+      <h1>Offline Rock Tracker</h1>
+      <div id="networkStatus" class="status">Checking network…</div>
+    </section>
+
+    <section class="card">
+      <h2>Add / Update Rock</h2>
+      <form id="entryForm">
+        <div class="field">
+          <label for="stoneId">Stone ID</label>
+          <input id="stoneId" type="text" required placeholder="e.g. ST-2041">
+        </div>
+
+        <div class="field">
+          <label for="weight">Weight (lbs)</label>
+          <input id="weight" type="number" min="0" step="0.01" required placeholder="0.00">
+        </div>
+
+        <div class="field">
+          <label for="entryDate">Date</label>
+          <input id="entryDate" type="date" required>
+        </div>
+
+        <div class="field">
+          <label for="tagCode">QR / NFC Tag Code</label>
+          <input id="tagCode" type="text" placeholder="e.g. STONE-A12-TAG">
+        </div>
+
+        <div class="field">
+          <label for="photo">Rock Photo (optional)</label>
+          <input id="photo" type="file" accept="image/*">
+        </div>
+      </form>
+
+      <div class="actions" style="margin-top: 12px;">
+        <button id="addEntryBtn" type="button">Add Entry</button>
+        <button id="exportBtn" class="secondary" type="button">Export CSV</button>
+        <button id="clearBtn" class="danger" type="button">Clear All</button>
+      </div>
+    </div>
+    </section>
+
+    <div class="result" id="result"></div>
+    <canvas id="pieChart"></canvas>
+    <div class="weights-list" id="weightsList"></div>
+  </div>
+    <section class="card">
+      <h2>Scan / Lookup</h2>
+      <div class="actions">
+        <input id="lookupCode" type="text" placeholder="Paste scanned QR/NFC code or URL" style="max-width: 420px;">
+        <button id="findBtn" type="button">Find Stone</button>
+        <button id="clearLookupBtn" class="secondary" type="button">Show All</button>
+      </div>
+      <div class="lookup-note">Tip: encode this app URL with <code>?tag=YOUR_TAG</code> into QR/NFC so a scan opens this rock directly.</div>
+    </section>
+
+    <section class="card">
+      <div class="summary" id="summary"></div>
+      <div class="entries" id="entries"></div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('dropdownBtn').addEventListener('click', function () {
+        document.getElementById('dropdown').classList.toggle('open');
+      });
+    });
+    const STORAGE_KEY = 'rockTrackerEntries';
+    const entriesEl = document.getElementById('entries');
+    const summaryEl = document.getElementById('summary');
+    const entryDateInput = document.getElementById('entryDate');
+    const lookupCodeInput = document.getElementById('lookupCode');
+    const lookupFromUrl = new URL(window.location.href).searchParams.get('tag') || '';
+
+    let input = '';
+    let weights = JSON.parse(localStorage.getItem('coreWeights') || '[]');
+    let chart = null;
+    let entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let activeLookup = lookupFromUrl;
+
+    function append(val) {
+      input += val;
+      document.getElementById('display').textContent = input;
+    entryDateInput.value = new Date().toISOString().slice(0, 10);
+    lookupCodeInput.value = lookupFromUrl;
+
+    function updateNetworkStatus() {
+      const el = document.getElementById('networkStatus');
+      const online = navigator.onLine;
+      el.textContent = online ? 'Online - data also works offline' : 'Offline mode - local data still available';
+      el.className = `status ${online ? 'online' : 'offline'}`;
+    }
+
+    function backspace() {
+      input = input.slice(0, -1);
+      document.getElementById('display').textContent = input || '0';
+    function saveEntries() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    function addWeight() {
+      const num = parseFloat(input);
+      if (!isNaN(num)) {
+        weights.push(num);
+        input = '';
+        document.getElementById('display').textContent = '0';
+        localStorage.setItem('coreWeights', JSON.stringify(weights));
+        updateResult();
+      }
+    function formatWeight(weight) {
+      return `${Number(weight).toFixed(2)} lbs`;
+    }
+
+    function updateResult() {
+      const total = weights.reduce((sum, w) => sum + w, 0);
+      const average = weights.length ? total / weights.length : 0;
+      const below75 = weights.filter(w => w <= 75).reduce((sum, w) => sum + w, 0);
+      const below20 = weights.filter(w => w <= 20).reduce((sum, w) => sum + w, 0);
+      const below2 = weights.filter(w => w <= 2).reduce((sum, w) => sum + w, 0);
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function parseLookupCode(input) {
+      const raw = input.trim();
+      if (!raw) return '';
+
+      try {
+        const parsed = new URL(raw, window.location.href);
+        if (parsed.searchParams.get('tag')) return parsed.searchParams.get('tag').trim();
+      } catch (_) {
+        // Not a URL; use plain text lookup code.
+      }
+
+      const percent75 = total ? (below75 / total * 100).toFixed(1) : 0;
+      const percent20 = total ? (below20 / total * 100).toFixed(1) : 0;
+      const percent2 = total ? (below2 / total * 100).toFixed(1) : 0;
+      return raw;
+    }
+
+    function getEntryLink(entry) {
+      if (!entry.tagCode) return '';
+      const link = new URL(window.location.href);
+      link.searchParams.set('tag', entry.tagCode);
+      return link.toString();
+    }
+
+      document.getElementById('result').innerHTML = `
+        <strong>Total Weight:</strong> ${total.toFixed(2)} lbs<br>
+        <strong>Average Weight:</strong> ${average.toFixed(2)} lbs<br>
+        <strong>% ≤ 75 lbs:</strong> <span style="color: ${percent75 >= 100 ? 'inherit' : 'red'}">${percent75}%</span><br>
+        <strong>% ≤ 20 lbs:</strong> <span style="color: ${percent20 >= 25 && percent20 <= 50 ? 'inherit' : 'red'}">${percent20}%</span><br>
+        <strong>% ≤ 2 lbs:</strong> <span style="color: ${percent2 >= 0 && percent2 <= 2 ? 'inherit' : 'red'}">${percent2}%</span>
+    function renderSummary(filteredEntries) {
+      const totalWeight = entries.reduce((sum, entry) => sum + Number(entry.weight), 0);
+      const filteredLabel = activeLookup ? ` | Showing ${filteredEntries.length} match(es)` : '';
+      summaryEl.innerHTML = `
+        <div><strong>Total Rocks:</strong> ${entries.length}${filteredLabel}</div>
+        <div><strong>Total Weight:</strong> ${formatWeight(totalWeight)}</div>
+      `;
+    }
+
+      const weightElements = weights.map((w, i) => `
+        <div class="weight-entry">
+          <span>#${i + 1}:</span>
+          <input type="number" value="${w}" onchange="editWeight(${i}, this.value)">
+          <button onclick="deleteWeight(${i})">✖</button>
+        </div>
+      `);
+      document.getElementById('weightsList').innerHTML = `<strong>Entered Weights:</strong><br>${weightElements.join('')}`;
+
+      const data = [percent75, percent20, percent2];
+      const labels = ['≤ 75 lbs', '≤ 20 lbs', '≤ 2 lbs'];
+
+      if (chart) chart.destroy();
+      chart = new Chart(document.getElementById('pieChart'), {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Percent Passing',
+            data: data,
+            backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'bottom' } }
+    function renderEntries() {
+      const normalizedLookup = activeLookup.trim().toLowerCase();
+      const filteredEntries = normalizedLookup
+        ? entries.filter((entry) =>
+            (entry.tagCode || '').toLowerCase() === normalizedLookup ||
+            entry.stoneId.toLowerCase() === normalizedLookup
+          )
+        : entries;
+
+      if (!entries.length) {
+        entriesEl.innerHTML = '<div class="empty">No rocks logged yet.</div>';
+        renderSummary(filteredEntries);
+        return;
+      }
+
+      if (!filteredEntries.length) {
+        entriesEl.innerHTML = '<div class="empty">No match for the scanned code. Try a different tag.</div>';
+        renderSummary(filteredEntries);
+        return;
+      }
+
+      entriesEl.innerHTML = filteredEntries.map((entry) => {
+        const link = getEntryLink(entry);
+        const safeStoneId = escapeHtml(entry.stoneId);
+        const safeDate = escapeHtml(entry.date);
+        const safeTag = escapeHtml(entry.tagCode || 'Not linked');
+        const safeLink = escapeHtml(link);
+        const photoTag = entry.photo
+          ? `<img src="${entry.photo}" alt="Rock ${safeStoneId}">`
+          : '<img alt="No photo" src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'300\'%3E%3Crect fill=\'%23262626\' width=\'100%25\' height=\'100%25\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23999999\' font-size=\'22\' font-family=\'Arial\'%3ENo photo%3C/text%3E%3C/svg%3E">';
+
+        return `
+          <article class="entry ${normalizedLookup ? 'focused' : ''}">
+            ${photoTag}
+            <div class="meta">
+              <div><strong>ID:</strong> ${safeStoneId}</div>
+              <div><strong>Weight:</strong> ${formatWeight(entry.weight)}</div>
+              <div><strong>Date:</strong> ${safeDate}</div>
+              <div><strong>Tag:</strong> <span class="tag-line">${safeTag}</span></div>
+              <div><strong>QR/NFC Link:</strong> ${link ? `<a href="${safeLink}" style="color:#ffd166;word-break:break-all;">${safeLink}</a>` : 'Add tag code to generate link'}</div>
+            </div>
+            <button class="danger" type="button" onclick="deleteEntry('${entry.id}')">Delete</button>
+          </article>
+        `;
+      }).join('');
+
+      renderSummary(filteredEntries);
+    }
+
+    function readPhoto(file) {
+      return new Promise((resolve, reject) => {
+        if (!file) {
+          resolve('');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Unable to read image file.'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function editWeight(index, newValue) {
+      const value = parseFloat(newValue);
+      if (!isNaN(value)) {
+        weights[index] = value;
+        localStorage.setItem('coreWeights', JSON.stringify(weights));
+        updateResult();
+    async function addEntry() {
+      const stoneId = document.getElementById('stoneId').value.trim();
+      const weight = document.getElementById('weight').value;
+      const date = document.getElementById('entryDate').value;
+      const tagCode = document.getElementById('tagCode').value.trim();
+      const photoFile = document.getElementById('photo').files[0];
+
+      if (!stoneId || !weight || !date) {
+        alert('Please fill in stone ID, weight, and date.');
+        return;
+      }
+
+      const photo = await readPhoto(photoFile);
+      entries.unshift({
+        id: crypto.randomUUID(),
+        stoneId,
+        weight: Number(weight),
+        date,
+        tagCode,
+        photo
+      });
+
+      saveEntries();
+      document.getElementById('entryForm').reset();
+      entryDateInput.value = new Date().toISOString().slice(0, 10);
+      renderEntries();
+    }
+
+    function deleteEntry(id) {
+      entries = entries.filter((entry) => entry.id !== id);
+      saveEntries();
+      renderEntries();
+    }
+
+    function deleteWeight(index) {
+      weights.splice(index, 1);
+      localStorage.setItem('coreWeights', JSON.stringify(weights));
+      updateResult();
+    function clearAllEntries() {
+      if (!confirm('Delete all rock entries?')) return;
+      entries = [];
+      saveEntries();
+      renderEntries();
+    }
+
+    function saveLog() {
+      const blob = new Blob([
+        `Weights: ${weights.join(', ')}\nTotal: ${weights.reduce((a,b)=>a+b,0).toFixed(2)} lbs\nAverage: ${(weights.reduce((a,b)=>a+b,0)/weights.length).toFixed(2)} lbs`
+      ], { type: 'text/plain' });
+    function exportCSV() {
+      if (!entries.length) {
+        alert('No entries to export.');
+        return;
+      }
+
+      const rows = [
+        ['Stone ID', 'Weight (lbs)', 'Date', 'Tag Code', 'QR/NFC Link', 'Photo Attached']
+      ];
+
+      entries.forEach((entry) => {
+        rows.push([
+          entry.stoneId,
+          Number(entry.weight).toFixed(2),
+          entry.date,
+          entry.tagCode || '',
+          getEntryLink(entry),
+          entry.photo ? 'Yes' : 'No'
+        ]);
+      });
+
+      const csv = rows.map((row) => row.map((item) => `"${String(item).replaceAll('"', '""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `core_rock_log.txt`;
+      a.download = `rock-tracker-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportCSV() {
+      const total = weights.reduce((sum, w) => sum + w, 0);
+      const average = weights.length ? total / weights.length : 0;
+      const below75 = weights.filter(w => w <= 75).reduce((sum, w) => sum + w, 0);
+      const below20 = weights.filter(w => w <= 20).reduce((sum, w) => sum + w, 0);
+      const below2 = weights.filter(w => w <= 2).reduce((sum, w) => sum + w, 0);
+
+      const percent75 = total ? (below75 / total * 100).toFixed(1) : 0;
+      const percent20 = total ? (below20 / total * 100).toFixed(1) : 0;
+      const percent2 = total ? (below2 / total * 100).toFixed(1) : 0;
+
+      let csvRows = [
+        ['Summary'],
+        [`Total Weight:`, `${total.toFixed(2)} lbs`],
+        [`Average Weight:`, `${average.toFixed(2)} lbs`],
+        [`% ≤ 75 lbs:`, `${percent75}%`],
+        [`% ≤ 20 lbs:`, `${percent20}%`],
+        [`% ≤ 2 lbs:`, `${percent2}%`],
+        [],
+        ['Rock', 'Weight (lbs)']
+      ];
+    function findStone() {
+      activeLookup = parseLookupCode(lookupCodeInput.value);
+      renderEntries();
+    }
+
+      weights.forEach((w, i) => {
+        csvRows.push([`#${i + 1}`, w.toFixed(2)]);
+      });
+    function clearLookup() {
+      activeLookup = '';
+      lookupCodeInput.value = '';
+      renderEntries();
+    }
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + csvRows.map(e => e.join(',')).join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', 'core_rock_log.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function resetApp() {
+      if (confirm('Are you sure you want to reset all data?')) {
+        weights = [];
+        input = '';
+        localStorage.removeItem('coreWeights');
+        document.getElementById('display').textContent = '0';
+        document.getElementById('result').innerHTML = '';
+        document.getElementById('weightsList').innerHTML = '';
+        if (chart) chart.destroy();
+      }
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+    updateNetworkStatus();
+
+    document.getElementById('addEntryBtn').addEventListener('click', addEntry);
+    document.getElementById('exportBtn').addEventListener('click', exportCSV);
+    document.getElementById('clearBtn').addEventListener('click', clearAllEntries);
+    document.getElementById('findBtn').addEventListener('click', findStone);
+    document.getElementById('clearLookupBtn').addEventListener('click', clearLookup);
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').catch((error) => {
+          console.error('Service worker registration failed:', error);
+        });
+      });
+    }
+
+    updateResult();
+    window.deleteEntry = deleteEntry;
+    renderEntries();
+  </script>
+</body>
+</html>
