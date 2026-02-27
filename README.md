@@ -3,7 +3,7 @@
 Offline-friendly tracker for logging stones with:
 
 - Stone ID
-- Weight
+- Weight (tons, imperial)
 - Date
 - Auto-generated unique tag code (`STONE-<uuid>`)
 

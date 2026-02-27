@@ -104,13 +104,13 @@ function lookupStone(code) {
     return;
   }
 
-  scanResult.textContent = `Match: ${found.stoneId} | ${found.weight}kg | ${found.date}`;
+  scanResult.textContent = `Match: ${found.stoneId} | ${found.weight} tons (imperial) | ${found.date}`;
   showFieldCard(found);
 }
 
 function showFieldCard(record) {
   fieldStoneId.textContent = record.stoneId;
-  fieldStoneWeight.textContent = `${record.weight.toFixed(2)} kg`;
+  fieldStoneWeight.textContent = `${record.weight.toFixed(2)} tons (imperial)`;
   fieldStoneDate.textContent = record.date;
   fieldStoneTag.textContent = record.tagCode;
   fieldResultCard.classList.remove("hidden");
@@ -184,7 +184,7 @@ function render() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${record.stoneId}</td>
-      <td>${record.weight.toFixed(2)} kg</td>
+      <td>${record.weight.toFixed(2)} tons (imperial)</td>
       <td>${record.date}</td>
       <td><code>${record.tagCode}</code></td>
       <td class="actions">
