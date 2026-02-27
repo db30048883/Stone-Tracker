@@ -1,0 +1,9 @@
+{
+  "name": "Stone Tracker",
+  "short_name": "Stones",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3f5f8",
+  "theme_color": "#0d6efd",
+  "icons": []
+}
