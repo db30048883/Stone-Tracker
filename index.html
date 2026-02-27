@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stone Tracker</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Stone Tracker</h1>
+        <p>Track stone IDs, weights, and dates with unique QR/NFC tag codes.</p>
+      </header>
+
+      <section class="card">
+        <h2>Add Stone</h2>
+        <form id="stone-form">
+          <label>Stone ID <input id="stone-id" required placeholder="ST-1001" /></label>
+          <label>Weight (tons only, imperial) <input id="weight" required type="number" step="0.01" min="0" placeholder="1.25" /></label>
+          <label>Date <input id="date" required type="date" /></label>
+          <button type="submit">Save Stone</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Scan / Lookup</h2>
+        <div class="scan-controls">
+          <input id="scan-input" placeholder="Paste scanned QR/NFC code or URL" />
+          <button id="find-stone" type="button">Find</button>
+          <button id="start-nfc-read" type="button">Read NFC</button>
+        </div>
+        <p id="scan-result" class="muted"></p>
+
+        <article id="field-result-card" class="field-result hidden" aria-live="polite">
+          <p class="field-label">Field Scan Result</p>
+          <h3 id="field-stone-id">No stone selected</h3>
+          <p><strong>Weight:</strong> <span id="field-stone-weight">-</span></p>
+          <p><strong>Date:</strong> <span id="field-stone-date">-</span></p>
+          <p><strong>Tag:</strong> <code id="field-stone-tag">-</code></p>
+        </article>
+      </section>
+
+      <section class="card">
+        <h2>Stones</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Stone ID</th>
+                <th>Weight</th>
+                <th>Date</th>
+                <th>Tag Code</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="stone-rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="qr-dialog">
+      <h3>QR Label</h3>
+      <p>
+        This QR encodes a lookup URL (<code>?tag=...</code>) so scanning opens Stone Tracker directly to the matching stone.
+      </p>
+      <img id="qr-image" alt="QR code label" />
+      <p><strong>Lookup URL:</strong></p>
+      <a id="qr-link" target="_blank" rel="noopener"></a>
+      <p><strong>Raw tag code:</strong> <code id="qr-raw-code"></code></p>
+      <button id="close-dialog">Close</button>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
