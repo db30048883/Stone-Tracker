@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stone Tracker</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <h1>Stone Tracker</h1>
+        <p>Create stones, print QR labels, and scan from any internet-connected device.</p>
+      </header>
+
+      <section class="card">
+        <h2>Setup (do this once)</h2>
+        <label>
+          Public App URL (Netlify URL)
+          <input id="public-url" placeholder="https://your-site.netlify.app" />
+        </label>
+        <p class="muted">QRs will use this URL so scanned stones open on any device.</p>
+      </section>
+
+      <section class="card">
+        <h2>Add Stone</h2>
+        <form id="stone-form">
+          <label>
+            Weight (tons)
+            <input id="weight" required type="number" min="0" step="0.01" placeholder="1.25" />
+          </label>
+          <label>
+            Date
+            <input id="date" required type="date" />
+          </label>
+          <button type="submit">Create Stone + QR</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Scan / Lookup</h2>
+        <div class="scan-row">
+          <input id="scan-input" placeholder="Paste scanned QR URL or stone ID" />
+          <button id="find-stone" type="button">Find</button>
+        </div>
+        <p id="scan-result" class="muted"></p>
+
+        <article id="field-card" class="field-card hidden" aria-live="polite">
+          <h3 id="field-stone-id">No stone selected</h3>
+          <p><strong>Weight:</strong> <span id="field-weight">-</span></p>
+          <p><strong>Date:</strong> <span id="field-date">-</span></p>
+          <p><strong>Stone ID:</strong> <code id="field-id-code">-</code></p>
+        </article>
+      </section>
+
+      <section class="card">
+        <h2>Stones</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Stone ID (auto)</th>
+                <th>Weight (tons)</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="stone-rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="qr-dialog">
+      <h3>Stone QR Label</h3>
+      <img id="qr-image" alt="Stone QR" />
+      <p><strong>Stone ID:</strong> <code id="qr-stone-id"></code></p>
+      <p><strong>QR URL:</strong></p>
+      <a id="qr-link" target="_blank" rel="noopener"></a>
+      <div class="dialog-actions">
+        <button id="print-qr" type="button">Print Label</button>
+        <button id="close-dialog" type="button" class="secondary">Close</button>
+      </div>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
