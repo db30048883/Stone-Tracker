@@ -1,5 +1,6 @@
-const STORAGE_KEY = "stone-tracker.records.v2";
+const STORAGE_KEY = "stone-tracker.records.v3";
 const PUBLIC_URL_KEY = "stone-tracker.public-url";
+const API_ENDPOINT = "/api/stones";
 
 const form = document.getElementById("stone-form");
 const rows = document.getElementById("stone-rows");
@@ -7,6 +8,8 @@ const publicUrlInput = document.getElementById("public-url");
 const scanInput = document.getElementById("scan-input");
 const scanResult = document.getElementById("scan-result");
 const findStoneButton = document.getElementById("find-stone");
+const cloudStatus = document.getElementById("cloud-status");
+const syncCloudButton = document.getElementById("sync-cloud");
 
 const fieldCard = document.getElementById("field-card");
 const fieldStoneId = document.getElementById("field-stone-id");
@@ -26,6 +29,7 @@ const records = loadRecords();
 publicUrlInput.value = localStorage.getItem(PUBLIC_URL_KEY) || `${window.location.origin}${window.location.pathname}`;
 render();
 lookupFromPageUrl();
+initializeCloud();
 
 publicUrlInput.addEventListener("change", () => {
   const normalized = normalizeBaseUrl(publicUrlInput.value);
@@ -33,7 +37,11 @@ publicUrlInput.addEventListener("change", () => {
   localStorage.setItem(PUBLIC_URL_KEY, normalized);
 });
 
-form.addEventListener("submit", (event) => {
+syncCloudButton.addEventListener("click", async () => {
+  await syncFromCloud();
+});
+
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const weight = Number.parseFloat(document.getElementById("weight").value);
@@ -54,10 +62,17 @@ form.addEventListener("submit", (event) => {
   render();
   showQr(record);
   form.reset();
+
+  try {
+    await saveToCloud(record);
+    setCloudStatus("Cloud connected. Stone saved online.");
+  } catch {
+    setCloudStatus("Saved on this device only. Cloud save failed (check Vercel/Neon).", true);
+  }
 });
 
-findStoneButton.addEventListener("click", () => {
-  lookupStone(scanInput.value.trim());
+findStoneButton.addEventListener("click", async () => {
+  await lookupStone(scanInput.value.trim());
 });
 
 printQrButton.addEventListener("click", () => window.print());
@@ -118,8 +133,7 @@ function showQr(record) {
   window.open(stoneUrl, "_blank", "noopener");
 }
 
-
-function lookupStone(inputValue) {
+async function lookupStone(inputValue) {
   const stoneId = extractStoneId(inputValue);
   if (!stoneId) {
     scanResult.textContent = "Paste a scanned QR URL or a STONE- ID.";
@@ -127,7 +141,16 @@ function lookupStone(inputValue) {
     return;
   }
 
-  const found = records.find((record) => record.stoneId === stoneId);
+  let found = records.find((record) => record.stoneId === stoneId);
+  if (!found) {
+    found = await fetchStoneFromCloud(stoneId);
+    if (found) {
+      mergeRecord(found);
+      persist();
+      render();
+    }
+  }
+
   if (!found) {
     scanResult.textContent = `No record found for ${stoneId}.`;
     hideFieldCard();
@@ -163,7 +186,7 @@ function lookupFromPageUrl() {
 
 function showFieldCard(record) {
   fieldStoneId.textContent = record.stoneId;
-  fieldWeight.textContent = `${record.weight.toFixed(2)} tons`;
+  fieldWeight.textContent = `${Number(record.weight).toFixed(2)} tons`;
   fieldDate.textContent = record.date;
   fieldIdCode.textContent = record.stoneId;
   fieldCard.classList.remove("hidden");
@@ -173,6 +196,16 @@ function hideFieldCard() {
   fieldCard.classList.add("hidden");
 }
 
+function mergeRecord(record) {
+  const existingIndex = records.findIndex((entry) => entry.stoneId === record.stoneId);
+  if (existingIndex === -1) {
+    records.unshift(record);
+    return;
+  }
+
+  records[existingIndex] = record;
+}
+
 function render() {
   rows.innerHTML = "";
 
@@ -180,7 +213,7 @@ function render() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><code>${record.stoneId}</code></td>
-      <td>${record.weight.toFixed(2)}</td>
+      <td>${Number(record.weight).toFixed(2)}</td>
       <td>${record.date}</td>
       <td class="actions">
         <button type="button" data-action="qr">QR</button>
@@ -196,6 +229,66 @@ function render() {
 
     rows.appendChild(tr);
   }
+}
+
+async function initializeCloud() {
+  setCloudStatus("Checking cloud connection...");
+  const ok = await syncFromCloud();
+  if (!ok) {
+    setCloudStatus("Cloud unavailable. App still works locally on this device.", true);
+  }
+}
+
+async function syncFromCloud() {
+  try {
+    const response = await fetch(API_ENDPOINT, { method: "GET" });
+    if (!response.ok) throw new Error("Cloud sync failed");
+
+    const payload = await response.json();
+    const cloudRecords = Array.isArray(payload.records) ? payload.records : [];
+
+    for (const record of cloudRecords) {
+      mergeRecord(record);
+    }
+
+    persist();
+    render();
+    setCloudStatus(`Cloud connected. ${cloudRecords.length} records synced.`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function saveToCloud(record) {
+  const response = await fetch(API_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(record),
+  });
+
+  if (!response.ok) {
+    throw new Error("Cloud save failed");
+  }
+}
+
+async function fetchStoneFromCloud(stoneId) {
+  try {
+    const url = new URL(API_ENDPOINT, window.location.origin);
+    url.searchParams.set("stoneId", stoneId);
+    const response = await fetch(url.toString(), { method: "GET" });
+    if (!response.ok) return null;
+
+    const payload = await response.json();
+    return payload.record || null;
+  } catch {
+    return null;
+  }
+}
+
+function setCloudStatus(message, isWarning = false) {
+  cloudStatus.textContent = message;
+  cloudStatus.classList.toggle("warning", isWarning);
 }
 
 if ("serviceWorker" in navigator) {

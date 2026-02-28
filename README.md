@@ -1,68 +1,71 @@
-# Stone Tracker
+# Stone Tracker (Neon + Vercel)
 
-A clean field-focused tracker with:
+This app lets your team:
 
-- Auto-generated Stone IDs
-- Weight entry in tons
-- Date entry
-- QR label generation for each stone
-- Scan/lookup flow from QR URLs
+- auto-generate a Stone ID for each new stone
+- enter weight in tons
+- enter date
+- generate/print a QR code label
+- scan a QR on any internet-connected device and fetch that stone from cloud storage
 
-## How this works (important)
+## Architecture
 
-This version is static and stores records in browser `localStorage`.
+- **Frontend:** static HTML/CSS/JS
+- **API:** Vercel Serverless Function at `api/stones.js`
+- **Database:** Neon Postgres (via `DATABASE_URL`)
 
-To make QR scans work on any internet-connected device:
+The browser still caches records locally for speed/offline, but source-of-truth is Neon when online.
 
-1. Host the app on Netlify.
-2. Set the **Public App URL** field in the app to your Netlify URL.
-3. Create stones and print QR labels from that hosted app.
-4. When scanned, QR opens `?stone=STONE-...` on your Netlify URL.
+## 1) Neon setup
 
-## Netlify integration steps
+1. In Neon, create a project/database.
+2. Copy the connection string from Neon dashboard.
+3. Keep it for Vercel as `DATABASE_URL`.
 
-### Fastest: Drag-and-drop
+> The API auto-creates the `stones` table on first request, so no manual SQL is required.
 
-1. Go to Netlify and sign in.
-2. Drag this project folder (or zip) into the deploy box.
-3. Copy the generated Netlify URL.
-4. Open that URL, paste it into **Public App URL** in the app, and save by clicking outside the input.
-
-### Recommended: Git-connected deploy
+## 2) Vercel setup
 
 1. Push this repo to GitHub.
-2. In Netlify: **Add new site** → **Import from Git**.
-3. Select your repo.
-4. Build command: *(leave empty)*
-5. Publish directory: `/`
-6. Deploy.
+2. In Vercel: **Add New Project** and import your repo.
+3. In Project Settings → **Environment Variables** add:
+   - `DATABASE_URL` = your Neon connection string
+4. Deploy.
 
-## QR process (field workflow)
+After deploy, your app URL will look like:
+`https://your-project.vercel.app`
 
-1. Enter **Weight (tons)** and **Date**.
+## 3) In-app setup
+
+1. Open your Vercel app URL.
+2. In **Public App URL**, paste your Vercel URL and save (click outside field).
+3. Confirm cloud status says connected.
+4. Click **Sync from Cloud** on each device once.
+
+## Field QR workflow (simple)
+
+1. Enter weight + date.
 2. Click **Create Stone + QR**.
-3. Stone ID is auto-generated like `STONE-AB12CD34`.
-4. QR dialog appears with QR image + URL.
-5. Click **Print Label**, print it, and stick it on stone.
-6. In field, scan QR on any phone with internet:
-   - It opens your hosted Netlify app URL with `?stone=...`
-   - App auto-shows that stone's details if that device has that record.
+3. App creates unique ID (ex: `STONE-AB12CD34`) and saves to Neon.
+4. Print QR and stick it on the stone.
+5. Any phone scans QR:
+   - opens your Vercel URL with `?stone=...`
+   - app looks up local cache first, then Neon
+   - shows the stone details card
 
-## Key limitation
-
-Without a backend, records live per device/browser. If you need guaranteed cross-device record lookup for all stones, you will need a backend store (Supabase/Firebase/API) in a follow-up.
-
-
-## Troubleshooting
-
-- If **Create Stone + QR** seems to do nothing on older devices, update browser and ensure JavaScript is enabled.
-- The app now has an automatic Stone ID fallback when `crypto.randomUUID()` is unavailable.
-- If the QR dialog cannot open in an older browser, it falls back to opening the stone URL directly in a new tab.
-
-## Local run
+## Local development
 
 ```bash
+npm install
 python3 -m http.server 8080
 ```
 
 Open `http://localhost:8080`.
+
+Note: local static server does not run the Vercel API route; deploy to Vercel to test cloud storage end-to-end.
+
+## Vercel build fix (if you saw runtime version errors)
+
+If Vercel shows: `Function Runtimes must have a valid version`, remove any custom runtime pinning and redeploy.
+This repo now relies on Vercel's default Node runtime for `api/stones.js`, which avoids that build-time parser error.
+

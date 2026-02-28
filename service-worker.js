@@ -1,4 +1,4 @@
-const CACHE_NAME = "stone-tracker-v2";
+const CACHE_NAME = "stone-tracker-v3";
 const APP_SHELL = ["/", "/index.html", "/styles.css", "/app.js", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
