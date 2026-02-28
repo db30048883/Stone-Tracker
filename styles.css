@@ -143,3 +143,12 @@ th {
   #qr-dialog, #qr-dialog * { visibility: visible; }
   #qr-dialog { position: absolute; left: 0; top: 0; }
 }
+
+.scan-row.single {
+  grid-template-columns: auto;
+}
+
+.muted.warning {
+  color: #b45309;
+  font-weight: 600;
+}

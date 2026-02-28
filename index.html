@@ -17,10 +17,18 @@
       <section class="card">
         <h2>Setup (do this once)</h2>
         <label>
-          Public App URL (Netlify URL)
-          <input id="public-url" placeholder="https://your-site.netlify.app" />
+          Public App URL (Vercel URL)
+          <input id="public-url" placeholder="https://your-app.vercel.app" />
         </label>
         <p class="muted">QRs will use this URL so scanned stones open on any device.</p>
+      </section>
+
+      <section class="card">
+        <h2>Cloud Sync (Neon + Vercel)</h2>
+        <div class="scan-row single">
+          <button id="sync-cloud" type="button">Sync from Cloud</button>
+        </div>
+        <p id="cloud-status" class="muted">Waiting for cloud check...</p>
       </section>
 
       <section class="card">
