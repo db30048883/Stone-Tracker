@@ -76,7 +76,12 @@ function persist() {
 }
 
 function generateStoneId() {
-  return `STONE-${crypto.randomUUID().split("-")[0].toUpperCase()}`;
+  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+    return `STONE-${window.crypto.randomUUID().split("-")[0].toUpperCase()}`;
+  }
+
+  const fallback = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`.toUpperCase();
+  return `STONE-${fallback}`;
 }
 
 function normalizeBaseUrl(urlValue) {
@@ -105,8 +110,14 @@ function showQr(record) {
   qrStoneId.textContent = record.stoneId;
   qrLink.href = stoneUrl;
   qrLink.textContent = stoneUrl;
-  qrDialog.showModal();
+  if (typeof qrDialog.showModal === "function") {
+    qrDialog.showModal();
+    return;
+  }
+
+  window.open(stoneUrl, "_blank", "noopener");
 }
+
 
 function lookupStone(inputValue) {
   const stoneId = extractStoneId(inputValue);

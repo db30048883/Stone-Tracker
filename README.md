@@ -52,6 +52,13 @@ To make QR scans work on any internet-connected device:
 
 Without a backend, records live per device/browser. If you need guaranteed cross-device record lookup for all stones, you will need a backend store (Supabase/Firebase/API) in a follow-up.
 
+
+## Troubleshooting
+
+- If **Create Stone + QR** seems to do nothing on older devices, update browser and ensure JavaScript is enabled.
+- The app now has an automatic Stone ID fallback when `crypto.randomUUID()` is unavailable.
+- If the QR dialog cannot open in an older browser, it falls back to opening the stone URL directly in a new tab.
+
 ## Local run
 
 ```bash
