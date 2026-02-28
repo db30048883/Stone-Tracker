@@ -1,9 +1,9 @@
 {
-  "name": "Stone Tracker (Fresh Start)",
+  "name": "Stone Tracker",
   "short_name": "Stones",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8fafc",
-  "theme_color": "#2563eb",
+  "theme_color": "#1d4ed8",
   "icons": []
 }
